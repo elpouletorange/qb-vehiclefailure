@@ -1,8 +1,13 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-QBCore.Commands.Add("fix", "Repair your vehicle (Admin Only)", {}, false, function(source)
+
+QBCore.Commands.Add("adminfix", "Repair your vehicle (Admin Only)", {}, false, function(source)
     TriggerClientEvent('iens:repaira', source)
     TriggerClientEvent('vehiclemod:client:fixEverything', source)
 end, "admin")
+
+QBCore.Commands.Add("fix", "Repair your vehicle", {}, false, function(source)
+    TriggerClientEvent('qb-vehiclefailure:client:RepairVehicleHalf', source)
+end, "user")
 
 QBCore.Functions.CreateUseableItem("repairkit", function(source, item)
     local Player = QBCore.Functions.GetPlayer(source)
