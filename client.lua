@@ -136,7 +136,7 @@ local function RepairVehicle(veh)
 	}, {}, {}, function() -- Done
 		StopAnimTask(PlayerPedId(), "mini@repair", "fixing_a_player", 1.0)
 		QBCore.Functions.Notify(Lang:t("success.repaired_veh"))
-		SetVehicleEngineHealth(veh, 500.0)
+		SetVehicleEngineHealth(veh, 750.0)
 		SetVehicleEngineOn(veh, true, false)
 		SetVehicleTyreFixed(veh, 0)
 		SetVehicleTyreFixed(veh, 1)
@@ -149,6 +149,49 @@ local function RepairVehicle(veh)
 			SetVehicleDoorShut(veh, 4, false)
 		end
 		TriggerServerEvent('qb-vehiclefailure:removeItem', "repairkit")
+	end, function() -- Cancel
+		StopAnimTask(PlayerPedId(), "mini@repair", "fixing_a_player", 1.0)
+		QBCore.Functions.Notify(Lang:t("error.failed_notification"), "error")
+		if (IsBackEngine(GetEntityModel(veh))) then
+			SetVehicleDoorShut(veh, 5, false)
+		else
+			SetVehicleDoorShut(veh, 4, false)
+		end
+	end)
+end
+
+local function RepairVehicleHalf(veh)
+	if (IsBackEngine(GetEntityModel(veh))) then
+        SetVehicleDoorOpen(veh, 5, false, false)
+    else
+        SetVehicleDoorOpen(veh, 4, false, false)
+    end
+	QBCore.Functions.Progressbar("repair_vehicle", Lang:t("progress.repair_veh"), math.random(5000, 10000), false, true, {
+		disableMovement = true,
+		disableCarMovement = true,
+		disableMouse = false,
+		disableCombat = true,
+	}, {
+		animDict = "mini@repair",
+		anim = "fixing_a_player",
+		flags = 16,
+	}, {}, {}, function() -- Done
+		StopAnimTask(PlayerPedId(), "mini@repair", "fixing_a_player", 1.0)
+		QBCore.Functions.Notify(Lang:t(('success.fix_message_%s'):format(fixMessagePos)))
+		fixMessagePos = fixMessagePos + 1
+		if fixMessagePos > repairCfg.fixMessageCount then fixMessagePos = 1 end
+		SetVehicleEngineHealth(veh, 250.0)
+		SetVehicleEngineOn(veh, true, false)
+		SetVehicleTyreFixed(veh, 0)
+		SetVehicleTyreFixed(veh, 1)
+		SetVehicleTyreFixed(veh, 2)
+		SetVehicleTyreFixed(veh, 3)
+		SetVehicleTyreFixed(veh, 4)
+		if (IsBackEngine(GetEntityModel(veh))) then
+			SetVehicleDoorShut(veh, 5, false)
+		else
+			SetVehicleDoorShut(veh, 4, false)
+		end
 	end, function() -- Cancel
 		StopAnimTask(PlayerPedId(), "mini@repair", "fixing_a_player", 1.0)
 		QBCore.Functions.Notify(Lang:t("error.failed_notification"), "error")
@@ -260,7 +303,7 @@ end
 RegisterNetEvent('qb-vehiclefailure:client:RepairVehicle', function()
 	local veh = QBCore.Functions.GetClosestVehicle()
 	local engineHealth = GetVehicleEngineHealth(veh) --This is to prevent people from "repairing" a vehicle and setting engine health lower than what the vehicles engine health was before repairing.
-	if veh ~= nil and veh ~= 0 and engineHealth < 500 then
+	if veh ~= nil and veh ~= 0 and engineHealth < 750 then
 		local ped = PlayerPedId()
 		local pos = GetEntityCoords(ped)
 		local vehpos = GetEntityCoords(veh)
@@ -332,6 +375,37 @@ RegisterNetEvent('qb-vehiclefailure:client:RepairVehicleFull', function()
 	end
 end)
 
+RegisterNetEvent('qb-vehiclefailure:client:RepairVehicleHalf', function()
+	local veh = QBCore.Functions.GetClosestVehicle()
+	local engineHealth = GetVehicleEngineHealth(veh) --This is to prevent people from "repairing" a vehicle and setting engine health lower than what the vehicles engine health was before repairing.
+	if veh ~= nil and veh ~= 0 and engineHealth < 250 then
+		local ped = PlayerPedId()
+		local pos = GetEntityCoords(ped)
+		local vehpos = GetEntityCoords(veh)
+		if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(ped) then
+			local drawpos = GetOffsetFromEntityInWorldCoords(veh, 0, 2.5, 0)
+			if (IsBackEngine(GetEntityModel(veh))) then
+				drawpos = GetOffsetFromEntityInWorldCoords(veh, 0, -2.5, 0)
+			end
+			if #(pos - drawpos) < 2.0 and not IsPedInAnyVehicle(ped) then
+				RepairVehicleHalf(veh)
+			end
+		else
+			if #(pos - vehpos) > 4.9 then
+				QBCore.Functions.Notify(Lang:t("error.out_range_veh"), "error")
+			else
+				QBCore.Functions.Notify(Lang:t("error.inside_veh"), "error")
+			end
+		end
+	else
+		if veh == nil or veh == 0 then
+			QBCore.Functions.Notify(Lang:t("error.not_near_veh"), "error")
+		else
+			QBCore.Functions.Notify(Lang:t("error.healthy_veh"), "error")
+		end
+	end
+end)
+
 RegisterNetEvent('iens:repaira', function()
 	if isPedDrivingAVehicle() then
 		local ped = PlayerPedId()
@@ -363,26 +437,27 @@ RegisterNetEvent('iens:repair', function()
 	if isPedDrivingAVehicle() then
 		local ped = PlayerPedId()
 		vehicle = GetVehiclePedIsIn(ped, false)
-		if IsNearMechanic() then
-			return
-		end
+		--if not IsNearMechanic() then
+		--	QBCore.Functions.Notify('You have to be near a Garage')
+		--	return
+		--end
 		if GetVehicleEngineHealth(vehicle) < cfg.cascadingFailureThreshold + 5 then
-			if GetVehicleOilLevel(vehicle) > 0 then
+			if GetVehicleOilLevel(vehicle) >= 0 then
 				SetVehicleUndriveable(vehicle,false)
 				SetVehicleEngineHealth(vehicle, cfg.cascadingFailureThreshold + 5)
 				SetVehiclePetrolTankHealth(vehicle, 750.0)
 				healthEngineLast=cfg.cascadingFailureThreshold +5
 				healthPetrolTankLast=750.0
 				SetVehicleEngineOn(vehicle, true, false )
-				SetVehicleOilLevel(vehicle,(GetVehicleOilLevel(vehicle)/3)-0.5)
-				QBCore.Functions.Notify(Lang:t(('fix_message_%s'):format(fixMessagePos)))
+				SetVehicleOilLevel(vehicle,(GetVehicleOilLevel(vehicle)/2)-0.5)
+				QBCore.Functions.Notify(Lang:t(('success.fix_message_%s'):format(fixMessagePos)))
 				fixMessagePos = fixMessagePos + 1
 				if fixMessagePos > repairCfg.fixMessageCount then fixMessagePos = 1 end
 			else
 				QBCore.Functions.Notify(Lang:t("error.veh_damaged"))
 			end
 		else
-			QBCore.Functions.Notify(Lang:t(('nofix_message_%s'):format(noFixMessagePos)))
+			QBCore.Functions.Notify(Lang:t(('error.nofix_message_%s'):format(noFixMessagePos)))
 			noFixMessagePos = noFixMessagePos + 1
 			if noFixMessagePos > repairCfg.noFixMessageCount then noFixMessagePos = 1 end
 		end
@@ -414,8 +489,8 @@ if cfg.torqueMultiplierEnabled or cfg.preventVehicleFlip or cfg.limpMode then
 			if cfg.torqueMultiplierEnabled or cfg.sundayDriver or cfg.limpMode then
 				if pedInSameVehicleLast then
 					local factor = 1.0
-					if cfg.torqueMultiplierEnabled and healthEngineNew < 900 then
-						factor = (healthEngineNew+200.0) / 1100
+					if cfg.torqueMultiplierEnabled and healthEngineNew < 800 then
+						factor = (healthEngineNew+200.0) / 1000
 					end
 					if cfg.sundayDriver and GetVehicleClass(vehicle) ~= 14 then -- Not for boats
 						local accelerator = GetControlValue(2,71)
