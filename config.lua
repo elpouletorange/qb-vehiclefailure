@@ -48,22 +48,22 @@ cfg = {
 	deformationExponent = 0.5,					-- How much should the handling file deformation setting be compressed toward 1.0. (Make cars more similar). A value of 1=no change. Lower values will compress more, values above 1 it will expand. Dont set to zero or negative.
 	collisionDamageExponent = 0.5,				-- How much should the handling file deformation setting be compressed toward 1.0. (Make cars more similar). A value of 1=no change. Lower values will compress more, values above 1 it will expand. Dont set to zero or negative.
 
-	damageFactorEngine = 3.0,					-- Sane values are 1 to 100. Higher values means more damage to vehicle. A good starting point is 10
-	damageFactorBody = 3.0,					-- Sane values are 1 to 100. Higher values means more damage to vehicle. A good starting point is 10
+	damageFactorEngine = 10.0,					-- Sane values are 1 to 100. Higher values means more damage to vehicle. A good starting point is 10
+	damageFactorBody = 20.0,					-- Sane values are 1 to 100. Higher values means more damage to vehicle. A good starting point is 10
 	damageFactorPetrolTank = 32.0,				-- Sane values are 1 to 200. Higher values means more damage to vehicle. A good starting point is 64
-	engineDamageExponent = 0.3,					-- How much should the handling file engine damage setting be compressed toward 1.0. (Make cars more similar). A value of 1=no change. Lower values will compress more, values above 1 it will expand. Dont set to zero or negative.
+	engineDamageExponent = 0.6,					-- How much should the handling file engine damage setting be compressed toward 1.0. (Make cars more similar). A value of 1=no change. Lower values will compress more, values above 1 it will expand. Dont set to zero or negative.
 	weaponsDamageMultiplier = 1.2,				-- How much damage should the vehicle get from weapons fire. Range 0.0 to 10.0, where 0.0 is no damage and 10.0 is 10x damage. -1 = don't touch
-	degradingHealthSpeedFactor = 2,			-- Speed of slowly degrading health, but not failure. Value of 10 means that it will take about 0.25 second per health point, so degradation from 800 to 305 will take about 2 minutes of clean driving. Higher values means faster degradation
-	cascadingFailureSpeedFactor = 4.0,			-- Sane values are 1 to 100. When vehicle health drops below a certain point, cascading failure sets in, and the health drops rapidly until the vehicle dies. Higher values means faster failure. A good starting point is 8
+	degradingHealthSpeedFactor = 3.0,			-- Speed of slowly degrading health, but not failure. Value of 10 means that it will take about 0.25 second per health point, so degradation from 800 to 305 will take about 2 minutes of clean driving. Higher values means faster degradation
+	cascadingFailureSpeedFactor = 8.0,			-- Sane values are 1 to 100. When vehicle health drops below a certain point, cascading failure sets in, and the health drops rapidly until the vehicle dies. Higher values means faster failure. A good starting point is 8
 
-	degradingFailureThreshold = 250.0,			-- Below this value, slow health degradation will set in
-	cascadingFailureThreshold = 200.0,			-- Below this value, health cascading failure will set in
+	degradingFailureThreshold = 500.0, --300.0,			-- Below this value, slow health degradation will set in
+	cascadingFailureThreshold = 200.0, --150.0,			-- Below this value, health cascading failure will set in
 	engineSafeGuard = 50.0,						-- Final failure value. Set it too high, and the vehicle won't smoke when disabled. Set too low, and the car will catch fire from a single bullet to the engine. At health 100 a typical car can take 3-4 bullets to the engine before catching fire.
 
 	torqueMultiplierEnabled = true,				-- Decrease engine torque as engine gets more and more damaged
 
-	limpMode = false,							-- If true, the engine never fails completely, so you will always be able to get to a mechanic unless you flip your vehicle and preventVehicleFlip is set to true
-	limpModeMultiplier = 0.15,					-- The torque multiplier to use when vehicle is limping. Sane values are 0.05 to 0.25
+	limpMode = true,							-- If true, the engine never fails completely, so you will always be able to get to a mechanic unless you flip your vehicle and preventVehicleFlip is set to true
+	limpModeMultiplier = 0.07,					-- The torque multiplier to use when vehicle is limping. Sane values are 0.05 to 0.25
 
 	preventVehicleFlip = true,					-- If true, you can't turn over an upside down vehicle
 
@@ -75,7 +75,7 @@ cfg = {
 
 	compatibilityMode = false,					-- prevents other scripts from modifying the fuel tank health to avoid random engine failure with BVA 2.01 (Downside is it disabled explosion prevention)
 
-	randomTireBurstInterval = 0,				-- Number of minutes (statistically, not precisely) to drive above 22 mph before you get a tire puncture. 0=feature is disabled
+	randomTireBurstInterval = 26280, --3 Years GTA Time ou 438h reel-- Number of minutes (statistically, not precisely) to drive above 22 mph before you get a tire puncture. 0=feature is disabled
 
 
 	-- Class Damagefactor Multiplier
@@ -91,7 +91,7 @@ cfg = {
 				0.3,		--	5: Sports Classics
 				0.3,		--	6: Sports
 				0.3,		--	7: Super
-				0.0,		--	8: Motorcycles
+				0.3,		--	8: Motorcycles --------   was 0.0
 				0.3,		--	9: Off-road
 				0.3,		--	10: Industrial
 				0.3,		--	11: Utility
@@ -210,6 +210,6 @@ repairCfg = {
 		{name="Garage", id=446, r=25.0, x=437.0,   y=3568.0,  z=38.0}		-- Auto Shop, Grand Senora Desert
 	},
 
-    fixMessageCount = 7,
-	noFixMessageCount = 6
+    fixMessageCount = 4,
+	noFixMessageCount = 4
 }
